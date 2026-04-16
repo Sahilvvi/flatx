@@ -6,10 +6,17 @@ insert into storage.buckets (id, name, public)
 values ('listings', 'listings', true)
 on conflict (id) do nothing;
 
--- 2. Policies. Uploads are expected to go through our API route using the
--- service-role key, which bypasses RLS anyway — but these policies let you
--- read files publicly and also permit authenticated users to upload directly
--- if you later migrate to client-side uploads.
+-- 2. Policies.
+--
+-- All writes go through /api/uploads using the service-role key, which
+-- bypasses RLS. Public reads are allowed so <img src> works without auth.
+--
+-- We intentionally do NOT install owner-scoped update/delete policies: our
+-- upload path stores files at `listings/{timestamp}-{random}.{ext}`, so
+-- `(storage.foldername(name))[1]` is always 'listings' and any UID-based
+-- policy would never match. If you later migrate to client-side uploads,
+-- change the path to `{auth.uid()}/{timestamp}-{random}.{ext}` and add
+-- owner-scoped policies then.
 
 drop policy if exists "Public read listings media" on storage.objects;
 create policy "Public read listings media"
@@ -24,16 +31,8 @@ create policy "Authenticated can upload listings media"
   to authenticated
   with check (bucket_id = 'listings');
 
+-- Previously-added "Owner can update own media" / "Owner can delete own media"
+-- policies (keyed on (storage.foldername(name))[1]) are dropped if present so
+-- they don't sit around looking valid but never matching any request.
 drop policy if exists "Owner can update own media" on storage.objects;
-create policy "Owner can update own media"
-  on storage.objects
-  for update
-  to authenticated
-  using (bucket_id = 'listings' and auth.uid()::text = (storage.foldername(name))[1]);
-
 drop policy if exists "Owner can delete own media" on storage.objects;
-create policy "Owner can delete own media"
-  on storage.objects
-  for delete
-  to authenticated
-  using (bucket_id = 'listings' and auth.uid()::text = (storage.foldername(name))[1]);
