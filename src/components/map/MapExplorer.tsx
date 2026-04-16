@@ -376,7 +376,10 @@ export function MapExplorer({ initialListings }: Props) {
                     <div
                       className="cluster-marker"
                       style={{ width: size, height: size, fontSize: size / 3 }}
-                      onClick={() => onClusterClick(props.cluster_id!, lat, lng)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClusterClick(props.cluster_id!, lat, lng);
+                      }}
                     >
                       {count}
                     </div>
@@ -396,7 +399,13 @@ export function MapExplorer({ initialListings }: Props) {
                   <button
                     type="button"
                     onMouseEnter={() => setActiveId(listing.id)}
-                    onClick={() => setActiveId(listing.id)}
+                    onClick={(e) => {
+                      // Stop propagation so the map's onClick doesn't also fire
+                      // and clear activeId / drop a pending pin on top of us.
+                      e.stopPropagation();
+                      setPendingPin(null);
+                      setActiveId(listing.id);
+                    }}
                     className={`rent-marker ${listing.kind === 'flatmate' ? 'flatmate' : ''} ${
                       withinCommute.size && !inCommute ? 'dimmed' : ''
                     } ${inCommute ? 'in-commute' : ''}`}
@@ -424,14 +433,20 @@ export function MapExplorer({ initialListings }: Props) {
                   anchor="top"
                   offset={[0, 8]}
                 >
-                  <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-60 text-sm">
+                  <div
+                    className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-60 text-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-semibold text-slate-900 leading-tight">
                         List a place here?
                       </div>
                       <button
                         type="button"
-                        onClick={() => setPendingPin(null)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPendingPin(null);
+                        }}
                         className="text-slate-400 hover:text-slate-600 text-xs"
                         aria-label="Cancel"
                       >
@@ -461,13 +476,19 @@ export function MapExplorer({ initialListings }: Props) {
                 anchor="top"
                 offset={[0, 8]}
               >
-                <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-64 text-sm">
+                <div
+                  className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-64 text-sm"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="font-semibold text-slate-900 leading-tight">
                       {activeListing.title}
                     </div>
                     <button
-                      onClick={() => setActiveId(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveId(null);
+                      }}
                       className="text-slate-400 hover:text-slate-600 text-xs"
                       aria-label="Close"
                     >
