@@ -41,6 +41,7 @@ export function MapExplorer({ initialListings }: Props) {
   const [bounds, setBounds] = useState<BBox | null>(null);
   const [commute, setCommute] = useState<CommuteState>(DEFAULT_COMMUTE);
   const [pickingOffice, setPickingOffice] = useState(false);
+  const [pendingPin, setPendingPin] = useState<{ lat: number; lng: number } | null>(null);
 
   // Fetch listings whenever filters or centre change (debounced).
   useEffect(() => {
@@ -152,7 +153,11 @@ export function MapExplorer({ initialListings }: Props) {
               error: err instanceof Error ? err.message : 'Failed to load commute zones',
             }));
           });
+        return;
       }
+      // Drop a pending pin — user can then click "Add listing here" to open the form pre-filled.
+      setActiveId(null);
+      setPendingPin({ lat: e.lngLat.lat, lng: e.lngLat.lng });
     },
     [pickingOffice, commute.minutes, commute.profile],
   );
@@ -198,6 +203,7 @@ export function MapExplorer({ initialListings }: Props) {
           onChange={setCommute}
           onPickOffice={() => {
             setPickingOffice(true);
+            setPendingPin(null);
             setMobileView('map');
           }}
           pickingOffice={pickingOffice}
@@ -276,10 +282,16 @@ export function MapExplorer({ initialListings }: Props) {
 
       {/* Map canvas */}
       <div className="relative flex-1 min-h-0">
-        {pickingOffice && (
+        {pickingOffice ? (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-slate-900 text-white text-xs font-semibold px-3 py-2 rounded-full shadow">
             Click anywhere on the map to set your office
           </div>
+        ) : (
+          !pendingPin && (
+            <div className="hidden md:block absolute top-3 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur border border-slate-200 text-slate-700 text-xs font-medium px-3 py-1.5 rounded-full shadow">
+              Tap anywhere on the map to list a place there
+            </div>
+          )
         )}
 
         {hasMapbox ? (
@@ -398,6 +410,49 @@ export function MapExplorer({ initialListings }: Props) {
                 </Marker>
               );
             })}
+
+            {pendingPin && !pickingOffice && (
+              <>
+                <Marker longitude={pendingPin.lng} latitude={pendingPin.lat} anchor="bottom">
+                  <div className="text-3xl drop-shadow" aria-label="Selected location">
+                    📍
+                  </div>
+                </Marker>
+                <Marker
+                  longitude={pendingPin.lng}
+                  latitude={pendingPin.lat}
+                  anchor="top"
+                  offset={[0, 8]}
+                >
+                  <div className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-60 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-semibold text-slate-900 leading-tight">
+                        List a place here?
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPendingPin(null)}
+                        className="text-slate-400 hover:text-slate-600 text-xs"
+                        aria-label="Cancel"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      <code className="bg-slate-100 px-1 rounded">
+                        {pendingPin.lat.toFixed(4)}, {pendingPin.lng.toFixed(4)}
+                      </code>
+                    </div>
+                    <Link
+                      href={`/listings/new?lat=${pendingPin.lat.toFixed(6)}&lng=${pendingPin.lng.toFixed(6)}`}
+                      className="block mt-2 text-center bg-[color:var(--brand)] text-white text-xs font-semibold py-1.5 rounded-md"
+                    >
+                      + Add listing here
+                    </Link>
+                  </div>
+                </Marker>
+              </>
+            )}
 
             {activeListing && (
               <Marker

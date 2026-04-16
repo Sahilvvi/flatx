@@ -22,7 +22,12 @@ const SOCIETY_TAGS = [
   'non_smoker',
 ];
 
-export function AddListingForm() {
+interface AddListingFormProps {
+  initialLat?: number;
+  initialLng?: number;
+}
+
+export function AddListingForm({ initialLat, initialLng }: AddListingFormProps = {}) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +41,11 @@ export function AddListingForm() {
   const [furnishing, setFurnishing] = useState<Furnishing>('semi');
   const [area, setArea] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
-  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+  const [pin, setPin] = useState<{ lat: number; lng: number } | null>(
+    initialLat !== undefined && initialLng !== undefined
+      ? { lat: initialLat, lng: initialLng }
+      : null,
+  );
   const [tags, setTags] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
 
@@ -192,7 +201,14 @@ export function AddListingForm() {
       </section>
 
       <section className="bg-white rounded-xl border border-slate-200 p-5">
-        <h2 className="text-sm font-semibold text-slate-900 mb-3">Drop a pin on the map</h2>
+        <h2 className="text-sm font-semibold text-slate-900 mb-1">
+          {pin ? 'Location pinned' : 'Drop a pin on the map'}
+        </h2>
+        {pin && initialLat !== undefined && initialLng !== undefined && (
+          <p className="text-xs text-slate-500 mb-3">
+            Pre-filled from the map. Click the map to adjust if needed.
+          </p>
+        )}
         <LocationPicker value={pin} onChange={setPin} />
       </section>
 
