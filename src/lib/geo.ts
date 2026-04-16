@@ -31,3 +31,22 @@ export function haversineMetres(
 export function isInMumbaiBounds(lat: number, lng: number): boolean {
   return lat >= 18.85 && lat <= 19.35 && lng >= 72.75 && lng <= 73.05;
 }
+
+/**
+ * Ray-casting point-in-polygon test. `ring` is an array of [lng, lat] coords
+ * forming a closed polygon (first and last coord are the same, or not — either
+ * works). Returns true if (lng, lat) is inside.
+ */
+export function pointInRing(lng: number, lat: number, ring: number[][]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0];
+    const yi = ring[i][1];
+    const xj = ring[j][0];
+    const yj = ring[j][1];
+    const intersect =
+      yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi + 1e-12) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}

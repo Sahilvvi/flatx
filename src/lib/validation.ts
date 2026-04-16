@@ -14,6 +14,7 @@ export interface NewListingInput {
   lat: number;
   lng: number;
   tags?: string[];
+  images?: string[];
   contact_whatsapp?: string;
 }
 
@@ -88,6 +89,13 @@ export function validateListing(raw: unknown): ValidationResult<NewListingInput>
     tags = b.tags.filter((t): t is string => typeof t === 'string' && t.length <= 30).slice(0, 10);
   }
 
+  let images: string[] | undefined;
+  if (Array.isArray(b.images)) {
+    images = b.images
+      .filter((u): u is string => typeof u === 'string' && /^https?:\/\/|^blob:/.test(u))
+      .slice(0, 10);
+  }
+
   return {
     ok: true,
     data: {
@@ -102,6 +110,7 @@ export function validateListing(raw: unknown): ValidationResult<NewListingInput>
       lat,
       lng,
       tags,
+      images,
       contact_whatsapp,
     },
   };

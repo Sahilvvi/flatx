@@ -86,7 +86,15 @@ export async function fetchAllListings(filters?: Filters): Promise<Listing[]> {
     .filter((l) => (filters?.minRent === undefined ? true : l.rent >= filters.minRent))
     .filter((l) => (filters?.maxRent === undefined ? true : l.rent <= filters.maxRent))
     .filter((l) => (filters?.bhk?.length ? filters.bhk.includes(l.bhk_type) : true))
-    .filter((l) => (filters?.furnishing?.length ? filters.furnishing.includes(l.furnishing) : true));
+    .filter((l) => (filters?.furnishing?.length ? filters.furnishing.includes(l.furnishing) : true))
+    .map((l) => ({ ...l, is_owner_verified: mockVerified(l.id) }));
+}
+
+/** Demo helper: pretend every other mock listing is from a verified user. */
+function mockVerified(id: string): boolean {
+  const m = id.match(/(\d+)$/);
+  if (!m) return false;
+  return Number(m[1]) % 2 === 0;
 }
 
 export async function fetchListingById(id: string): Promise<Listing | null> {
@@ -95,7 +103,8 @@ export async function fetchListingById(id: string): Promise<Listing | null> {
     const { data, error } = await admin.from('listings').select('*').eq('id', id).maybeSingle();
     if (!error && data) return data as Listing;
   }
-  return MOCK_LISTINGS.find((l) => l.id === id) ?? null;
+  const hit = MOCK_LISTINGS.find((l) => l.id === id) ?? null;
+  return hit ? { ...hit, is_owner_verified: mockVerified(hit.id) } : null;
 }
 
 export async function createListing(input: NewListingInput): Promise<Listing> {
@@ -115,6 +124,7 @@ export async function createListing(input: NewListingInput): Promise<Listing> {
         lat: input.lat,
         lng: input.lng,
         tags: input.tags ?? [],
+        images: input.images ?? [],
         contact_whatsapp: input.contact_whatsapp,
       })
       .select('*')
@@ -136,7 +146,7 @@ export async function createListing(input: NewListingInput): Promise<Listing> {
     area_name: input.area_name ?? null,
     lat: input.lat,
     lng: input.lng,
-    images: [],
+    images: input.images ?? [],
     tags: input.tags ?? [],
     contact_whatsapp: input.contact_whatsapp ?? null,
     created_at: new Date().toISOString(),
