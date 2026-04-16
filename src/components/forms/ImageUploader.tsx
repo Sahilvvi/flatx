@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   value: string[];
@@ -18,9 +18,18 @@ export function ImageUploader({ value, onChange, maxFiles = 6 }: Props) {
   const [uploading, setUploading] = useState(0);
   const [errors, setErrors] = useState<UploadError[]>([]);
 
+  // Keep a live ref to the latest `value` so the async `handleFiles` always
+  // merges uploads against current state — not the stale prop captured when
+  // the function was invoked. Without this, removing an image mid-upload
+  // would see the removed image reappear once the upload settled.
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
   async function handleFiles(files: FileList | null) {
     if (!files || !files.length) return;
-    const remaining = maxFiles - value.length;
+    const remaining = maxFiles - valueRef.current.length;
     const picked = Array.from(files).slice(0, remaining);
     const newErrors: UploadError[] = [];
     setUploading((u) => u + picked.length);
@@ -56,12 +65,12 @@ export function ImageUploader({ value, onChange, maxFiles = 6 }: Props) {
       }
     }
 
-    if (uploaded.length) onChange([...value, ...uploaded]);
+    if (uploaded.length) onChange([...valueRef.current, ...uploaded]);
     if (newErrors.length) setErrors((e) => [...e, ...newErrors]);
   }
 
   function remove(idx: number) {
-    onChange(value.filter((_, i) => i !== idx));
+    onChange(valueRef.current.filter((_, i) => i !== idx));
   }
 
   return (
