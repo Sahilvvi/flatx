@@ -70,7 +70,12 @@ export function ImageUploader({ value, onChange, maxFiles = 6 }: Props) {
   }
 
   function remove(idx: number) {
-    onChange(valueRef.current.filter((_, i) => i !== idx));
+    // The rendered list iterates over the `value` prop (not valueRef), so
+    // indices are derived from `value`. Filtering against `value` here keeps
+    // the index and the array from the same render in sync — avoids a subtle
+    // window between a parent re-render and the valueRef useEffect firing
+    // where the two could disagree.
+    onChange(value.filter((_, i) => i !== idx));
   }
 
   return (
