@@ -60,6 +60,7 @@ function filterMockListings(q: NearbyQuery, radius: number, limit: number): List
   return MOCK_LISTINGS.map((l) => ({
     ...l,
     distance_m: haversineMetres(q.lat, q.lng, l.lat, l.lng),
+    is_owner_verified: mockVerified(l.id),
   }))
     .filter((l) => (l.distance_m ?? 0) <= radius)
     .filter((l) => (q.minRent === undefined ? true : l.rent >= q.minRent))

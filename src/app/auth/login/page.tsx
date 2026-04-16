@@ -166,7 +166,9 @@ export default function LoginPage() {
 }
 
 function normalisePhone(input: string): string | null {
-  const digits = input.replace(/[^\d+]/g, '');
+  // Strip everything except digits and `+`, then drop any `+` that isn't the
+  // very first character (e.g. "+91+98..." → "+9198...").
+  const digits = input.replace(/[^\d+]/g, '').replace(/(?!^)\+/g, '');
   if (!digits) return null;
   if (digits.startsWith('+')) return digits.length >= 8 ? digits : null;
   // Default to India +91 if a bare 10-digit number was entered.

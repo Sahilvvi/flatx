@@ -42,10 +42,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       return;
     }
+    // `public.users.auth_id` links to `auth.users.id`; the primary key `id`
+    // is a separate auto-generated UUID. Always look up / insert by `auth_id`
+    // — the RLS policies in 0003_listings_with_owner.sql also key on it.
     const { data } = await supabase
       .from('users')
       .select('id, phone, is_verified, name')
-      .eq('id', u.id)
+      .eq('auth_id', u.id)
       .maybeSingle();
     if (data) {
       setProfile(data as Profile);
@@ -55,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const phone = (u.phone as string | undefined) ?? null;
       const { data: inserted } = await supabase
         .from('users')
-        .insert({ id: u.id, phone, is_verified: !!phone })
+        .insert({ auth_id: u.id, phone, is_verified: !!phone })
         .select('id, phone, is_verified, name')
         .maybeSingle();
       setProfile((inserted as Profile) ?? null);
