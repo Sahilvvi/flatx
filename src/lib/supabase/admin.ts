@@ -17,6 +17,15 @@ export function getSupabaseAdmin(): SupabaseClient | null {
   if (!adminClient) {
     adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
+      global: {
+        // Disable the Next.js Data Cache for every request the admin client
+        // makes to PostgREST. Without this, GET responses (including empty
+        // arrays returned while misconfigured) get memoised per URL+body and
+        // persist across deployments, which makes newly-inserted listings
+        // invisible to the map until the cache is manually flushed.
+        fetch: (input, init) =>
+          fetch(input, { ...init, cache: 'no-store' }),
+      },
     });
   }
   return adminClient;
