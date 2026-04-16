@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { Listing } from '@/lib/types';
 import { formatDistance, formatINR, whatsappHref } from '@/lib/format';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 
 interface Props {
   listing: Listing;
@@ -26,9 +27,18 @@ export function ListingCard({ listing, active, onHover, onClick }: Props) {
         active ? 'border-[color:var(--brand)] ring-2 ring-[color:var(--brand)]/30' : 'border-slate-200 hover:border-slate-300',
       ].join(' ')}
     >
+      {listing.images?.length > 0 && (
+        <div className="-mx-4 -mt-4 mb-3 aspect-[16/9] bg-slate-100 overflow-hidden rounded-t-xl">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={listing.images[0]} alt="" className="w-full h-full object-cover" />
+        </div>
+      )}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-semibold text-slate-900 truncate">{listing.title}</h3>
+          <h3 className="font-semibold text-slate-900 truncate flex items-center gap-1">
+            <span className="truncate">{listing.title}</span>
+            {listing.is_owner_verified && <VerifiedBadge size="sm" />}
+          </h3>
           <p className="text-xs text-slate-500 mt-0.5">
             {listing.area_name ?? 'Mumbai'} · {listing.bhk_type} · {labelFurnishing(listing.furnishing)}
             {listing.distance_m !== undefined && (

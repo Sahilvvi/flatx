@@ -5,6 +5,8 @@ import { formatINR } from '@/lib/format';
 import { whatsappHref } from '@/lib/format';
 import { ListingMapPreview } from '@/components/map/ListingMapPreview';
 import { ListingCard } from '@/components/ListingCard';
+import { ListingGallery } from '@/components/ListingGallery';
+import { VerifiedBadge } from '@/components/VerifiedBadge';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,12 +63,19 @@ export default async function ListingDetailPage({ params }: Props) {
       <div className="grid md:grid-cols-3 gap-6 mt-4">
         <div className="md:col-span-2 space-y-6">
           <header>
-            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{listing.title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-start gap-2">
+              <span>{listing.title}</span>
+              {listing.is_owner_verified && <VerifiedBadge size="md" withLabel />}
+            </h1>
             <p className="text-slate-600 mt-1">
               {listing.area_name ?? 'Mumbai'} · {listing.bhk_type} ·{' '}
               {listing.furnishing === 'semi' ? 'Semi-furnished' : listing.furnishing}
             </p>
           </header>
+
+          {listing.images.length > 0 && (
+            <ListingGallery images={listing.images} alt={listing.title} />
+          )}
 
           <ListingMapPreview lat={listing.lat} lng={listing.lng} />
 

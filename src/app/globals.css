@@ -42,6 +42,13 @@ body {
 .rent-marker.flatmate {
   background: #ff6b35;
 }
+.rent-marker.dimmed {
+  opacity: 0.35;
+  filter: saturate(0.6);
+}
+.rent-marker.in-commute {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.45), 0 2px 6px rgba(0, 0, 0, 0.15);
+}
 
 .cluster-marker {
   background: #0b6e4f;

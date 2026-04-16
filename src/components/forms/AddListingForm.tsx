@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { LocationPicker } from '@/components/map/LocationPicker';
+import { ImageUploader } from '@/components/forms/ImageUploader';
 import {
   BHK_OPTIONS,
   FURNISHING_OPTIONS,
@@ -37,6 +38,7 @@ export function AddListingForm() {
   const [whatsapp, setWhatsapp] = useState('');
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
   const [tags, setTags] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
 
   const toggleTag = (t: string) =>
     setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
@@ -66,6 +68,7 @@ export function AddListingForm() {
           lng: pin.lng,
           contact_whatsapp: whatsapp,
           tags,
+          images,
         }),
       });
       const data = await res.json();
@@ -191,6 +194,14 @@ export function AddListingForm() {
       <section className="bg-white rounded-xl border border-slate-200 p-5">
         <h2 className="text-sm font-semibold text-slate-900 mb-3">Drop a pin on the map</h2>
         <LocationPicker value={pin} onChange={setPin} />
+      </section>
+
+      <section className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
+        <h2 className="text-sm font-semibold text-slate-900">Photos</h2>
+        <p className="text-xs text-slate-500">
+          Add up to 6 photos of the place. JPEG / PNG / WEBP, max 5&nbsp;MB each.
+        </p>
+        <ImageUploader value={images} onChange={setImages} maxFiles={6} />
       </section>
 
       <section className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">

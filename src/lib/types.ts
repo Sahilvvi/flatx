@@ -19,6 +19,7 @@ export interface Listing {
   tags: string[];
   contact_whatsapp: string | null;
   distance_m?: number;
+  is_owner_verified?: boolean;
   created_at: string;
 }
 
