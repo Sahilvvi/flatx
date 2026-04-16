@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Map, {
   Layer,
   Marker,
@@ -20,12 +21,14 @@ import { FiltersPanel, DEFAULT_FILTERS, type FiltersState } from '@/components/F
 import { ListingCard } from '@/components/ListingCard';
 import { CommutePanel, DEFAULT_COMMUTE, type CommuteState } from '@/components/map/CommutePanel';
 import { pointInRing } from '@/lib/geo';
+import { MUMBAI_TRANSIT, TRANSIT_LEGEND } from '@/lib/transit-data';
 
 interface Props {
   initialListings: Listing[];
 }
 
 export function MapExplorer({ initialListings }: Props) {
+  const router = useRouter();
   const mapRef = useRef<MapRef | null>(null);
   const [viewState, setViewState] = useState<Partial<ViewState>>({
     latitude: DEFAULT_LAT,
@@ -42,6 +45,7 @@ export function MapExplorer({ initialListings }: Props) {
   const [commute, setCommute] = useState<CommuteState>(DEFAULT_COMMUTE);
   const [pickingOffice, setPickingOffice] = useState(false);
   const [pendingPin, setPendingPin] = useState<{ lat: number; lng: number } | null>(null);
+  const [showTransit, setShowTransit] = useState(false);
 
   // Fetch listings whenever filters or centre change (debounced).
   useEffect(() => {
@@ -155,11 +159,18 @@ export function MapExplorer({ initialListings }: Props) {
           });
         return;
       }
-      // Drop a pending pin — user can then click "Add listing here" to open the form pre-filled.
+      // Drop a pending pin then immediately navigate to the pre-filled listing
+      // form. Showing the pin for a beat gives the user a visual confirmation
+      // of where they tapped before the form opens.
+      const lat = e.lngLat.lat;
+      const lng = e.lngLat.lng;
       setActiveId(null);
-      setPendingPin({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+      setPendingPin({ lat, lng });
+      setTimeout(() => {
+        router.push(`/listings/new?lat=${lat.toFixed(6)}&lng=${lng.toFixed(6)}`);
+      }, 200);
     },
-    [pickingOffice, commute.minutes, commute.profile],
+    [pickingOffice, commute.minutes, commute.profile, router],
   );
 
   // Sort list: listings within commute zone first when commute is active.
@@ -423,7 +434,7 @@ export function MapExplorer({ initialListings }: Props) {
             {pendingPin && !pickingOffice && (
               <>
                 <Marker longitude={pendingPin.lng} latitude={pendingPin.lat} anchor="bottom">
-                  <div className="text-3xl drop-shadow" aria-label="Selected location">
+                  <div className="text-3xl drop-shadow animate-bounce" aria-label="Selected location">
                     📍
                   </div>
                 </Marker>
@@ -434,39 +445,38 @@ export function MapExplorer({ initialListings }: Props) {
                   offset={[0, 8]}
                 >
                   <div
-                    className="mt-1 bg-white rounded-lg shadow-lg border border-slate-200 p-3 w-60 text-sm"
+                    className="mt-1 bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="font-semibold text-slate-900 leading-tight">
-                        List a place here?
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPendingPin(null);
-                        }}
-                        className="text-slate-400 hover:text-slate-600 text-xs"
-                        aria-label="Cancel"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div className="text-xs text-slate-500 mt-1">
-                      <code className="bg-slate-100 px-1 rounded">
-                        {pendingPin.lat.toFixed(4)}, {pendingPin.lng.toFixed(4)}
-                      </code>
-                    </div>
-                    <Link
-                      href={`/listings/new?lat=${pendingPin.lat.toFixed(6)}&lng=${pendingPin.lng.toFixed(6)}`}
-                      className="block mt-2 text-center bg-[color:var(--brand)] text-white text-xs font-semibold py-1.5 rounded-md"
-                    >
-                      + Add listing here
-                    </Link>
+                    Opening listing form…
                   </div>
                 </Marker>
               </>
+            )}
+
+            {showTransit && (
+              <Source id="mumbai-transit" type="geojson" data={MUMBAI_TRANSIT}>
+                <Layer
+                  id="transit-lines-casing"
+                  type="line"
+                  paint={{
+                    'line-color': '#ffffff',
+                    'line-width': 5,
+                    'line-opacity': 0.9,
+                  }}
+                  layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                />
+                <Layer
+                  id="transit-lines"
+                  type="line"
+                  paint={{
+                    'line-color': ['get', 'color'],
+                    'line-width': 3,
+                    'line-opacity': 0.95,
+                  }}
+                  layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+                />
+              </Source>
             )}
 
             {activeListing && (
@@ -515,6 +525,42 @@ export function MapExplorer({ initialListings }: Props) {
         ) : (
           <MapFallback />
         )}
+
+        {/* Transit toggle + legend */}
+        <div className="absolute top-3 right-14 md:right-16 z-30 flex flex-col items-end gap-2">
+          <button
+            type="button"
+            onClick={() => setShowTransit((s) => !s)}
+            aria-pressed={showTransit}
+            className={`rounded-full px-3 py-2 text-xs font-semibold shadow border transition-colors ${
+              showTransit
+                ? 'bg-slate-900 text-white border-slate-900'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            🚆 Transit {showTransit ? 'on' : 'off'}
+          </button>
+          {showTransit && (
+            <div className="bg-white/95 backdrop-blur border border-slate-200 rounded-lg shadow p-2 text-[11px] leading-tight max-w-[160px]">
+              <div className="font-semibold text-slate-700 mb-1">Mumbai transit</div>
+              <ul className="space-y-1">
+                {TRANSIT_LEGEND.map((l) => (
+                  <li key={l.label} className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="inline-block w-4 h-1.5 rounded-full"
+                      style={{ background: l.color }}
+                    />
+                    <span className="text-slate-600">{l.label}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-1 pt-1 border-t border-slate-100 text-[10px] text-slate-400">
+                Static route overlay
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Mobile toggle between map/list */}
         <button
