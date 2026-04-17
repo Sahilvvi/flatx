@@ -43,5 +43,9 @@ export function listingMatchesArea(areaName: string | null | undefined, area: Ar
   // `'bandra east'.includes('bandra')` wrongly pull East listings into the
   // West page and vice versa.
   if (area.aliases?.some((a) => name === a.toLowerCase())) return true;
-  return name === target;
+  // Safe substring fallback: match the *full* area name as a substring so
+  // values like `"Dadar East"` or `"Powai, Mumbai"` still map to the right
+  // area page. This does NOT re-introduce the East/West bug because the full
+  // area name (e.g. `"bandra west"`) is never a substring of `"bandra east"`.
+  return name.includes(target);
 }
