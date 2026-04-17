@@ -27,12 +27,20 @@ export function ListingCard({ listing, active, onHover, onClick }: Props) {
         active ? 'border-[color:var(--brand)] ring-2 ring-[color:var(--brand)]/30' : 'border-slate-200 hover:border-slate-300',
       ].join(' ')}
     >
-      {listing.images?.length > 0 && (
-        <div className="-mx-4 -mt-4 mb-3 aspect-[16/9] bg-slate-100 overflow-hidden rounded-t-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+      <div className="-mx-4 -mt-4 mb-3 aspect-[16/9] bg-slate-100 overflow-hidden rounded-t-xl">
+        {listing.images?.length > 0 ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img src={listing.images[0]} alt="" className="w-full h-full object-cover" />
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[color:var(--brand)]/10 via-slate-100 to-slate-200 text-slate-400">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M3 10.5 12 3l9 7.5" />
+              <path d="M5 9v12h14V9" />
+              <path d="M10 21v-6h4v6" />
+            </svg>
+          </div>
+        )}
+      </div>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="font-semibold text-slate-900 truncate flex items-center gap-1">
