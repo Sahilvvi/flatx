@@ -36,8 +36,12 @@ export function findArea(slug: string): AreaInfo | null {
 /** True when a listing's `area_name` matches the area (case-insensitive). */
 export function listingMatchesArea(areaName: string | null | undefined, area: AreaInfo): boolean {
   if (!areaName) return false;
-  const name = areaName.toLowerCase();
-  if (name === area.name.toLowerCase()) return true;
-  if (area.aliases?.some((a) => name.includes(a.toLowerCase()))) return true;
-  return name.includes(area.name.toLowerCase());
+  const name = areaName.toLowerCase().trim();
+  const target = area.name.toLowerCase();
+  if (name === target) return true;
+  // Only accept alias matches when they are exact — substring matches like
+  // `'bandra east'.includes('bandra')` wrongly pull East listings into the
+  // West page and vice versa.
+  if (area.aliases?.some((a) => name === a.toLowerCase())) return true;
+  return name === target;
 }
