@@ -19,6 +19,7 @@ export async function GET(req: Request) {
   const bhk = url.searchParams.getAll('bhk') as BhkType[];
   const furnishing = url.searchParams.getAll('furnishing') as Furnishing[];
   const kind = url.searchParams.get('kind') as ListingKind | null;
+  const limit = url.searchParams.get('limit');
 
   const listings = await fetchNearbyListings({
     lat,
@@ -29,6 +30,7 @@ export async function GET(req: Request) {
     bhk: bhk.length ? bhk : undefined,
     furnishing: furnishing.length ? furnishing : undefined,
     kind: kind ?? undefined,
+    limit: limit ? Number(limit) : undefined,
   });
 
   return NextResponse.json({ listings });

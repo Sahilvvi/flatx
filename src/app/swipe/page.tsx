@@ -38,7 +38,10 @@ export default function SwipePage() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/api/listings/nearby?lat=19.076&lng=72.8777&radiusM=20000&limit=60');
+        const res = await fetch(
+          '/api/listings/nearby?lat=19.076&lng=72.8777&radius=20000&limit=60',
+          { cache: 'no-store' },
+        );
         if (!res.ok) throw new Error(`listings: ${res.status}`);
         const json = (await res.json()) as { listings?: Listing[] };
         if (!cancelled) setListings(json.listings ?? []);

@@ -191,7 +191,13 @@ function DeckCard({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={listing.images[0]} alt="" className="w-full h-64 object-cover bg-slate-100" />
       ) : (
-        <div className="w-full h-64 bg-gradient-to-br from-slate-200 to-slate-300" />
+        <div className="w-full h-64 flex items-center justify-center bg-gradient-to-br from-[color:var(--brand)]/15 via-slate-100 to-slate-200 text-slate-400">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5 9v12h14V9" />
+            <path d="M10 21v-6h4v6" />
+          </svg>
+        </div>
       )}
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
