@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { fetchNearbyListings, computeRentInsight } from '@/lib/listings-service';
+import { fetchNearbyListings } from '@/lib/listings-service';
 import { ListingCard } from '@/components/ListingCard';
 import { formatINR } from '@/lib/format';
 import { AREAS, findArea, listingMatchesArea } from '@/lib/areas';
@@ -63,8 +63,6 @@ export default async function AreaPage({ params }: Props) {
       medians[bhk] = vals[Math.floor(vals.length / 2)];
     }
   }
-
-  const insight2BHK = await computeRentInsight(area.lat, area.lng, 2500, '2BHK');
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -135,7 +133,7 @@ export default async function AreaPage({ params }: Props) {
                 </li>
               ))}
             </ul>
-            {insight2BHK.sample_size >= 3 && (
+            {displayListings.length >= 3 && (
               <p className="text-xs text-slate-500 mt-3">
                 Based on {displayListings.length} listings within 2.5 km of {area.name}.
               </p>
