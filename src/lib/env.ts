@@ -18,6 +18,12 @@ export const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '20');
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flatx.vercel.app').replace(/\/$/, '');
 
+/** Comma-separated emails allowed to access /admin. */
+export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? '')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
 export const hasSupabase = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const hasSupabaseAdmin = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 export const hasMapbox = Boolean(MAPBOX_TOKEN);
