@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 export function Navbar() {
   const { user, profile, signOut, loading } = useAuth();
@@ -87,7 +88,10 @@ export function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1 text-sm">{navLinks}</nav>
+        <nav className="hidden md:flex items-center gap-1 text-sm">
+          {navLinks}
+          <LanguageToggle />
+        </nav>
 
         {/* Mobile hamburger */}
         <button
@@ -123,6 +127,9 @@ export function Navbar() {
           />
           <nav className="md:hidden absolute top-14 left-0 right-0 z-40 bg-white border-b border-slate-200 shadow-lg flex flex-col py-2 text-sm">
             {navLinks}
+            <div className="px-3 py-2 border-t border-slate-100">
+              <LanguageToggle />
+            </div>
           </nav>
         </>
       )}
