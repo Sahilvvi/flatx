@@ -16,6 +16,8 @@ export const DEFAULT_ZOOM = Number(process.env.NEXT_PUBLIC_DEFAULT_ZOOM ?? '11')
 export const RATE_LIMIT_WINDOW = Number(process.env.RATE_LIMIT_WINDOW ?? '60');
 export const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? '20');
 
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flatx.vercel.app').replace(/\/$/, '');
+
 export const hasSupabase = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const hasSupabaseAdmin = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 export const hasMapbox = Boolean(MAPBOX_TOKEN);
