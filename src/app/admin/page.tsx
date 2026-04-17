@@ -34,6 +34,8 @@ export default function AdminPage() {
   const load = useCallback(async () => {
     if (!token) return;
     setErr(null);
+    // Reset so a previous 403 doesn't stick across account switches.
+    setAccessDenied(false);
     try {
       const [lRes, dRes] = await Promise.all([
         fetch('/api/admin/listings', { headers: { Authorization: `Bearer ${token}` } }),
