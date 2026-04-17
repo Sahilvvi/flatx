@@ -6,7 +6,9 @@ import { whatsappHref } from '@/lib/format';
 import { ListingMapPreview } from '@/components/map/ListingMapPreview';
 import { ListingCard } from '@/components/ListingCard';
 import { ListingGallery } from '@/components/ListingGallery';
+import { ShareButton } from '@/components/ShareButton';
 import { VerifiedBadge } from '@/components/VerifiedBadge';
+import { SITE_URL } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,6 +166,11 @@ export default async function ListingDetailPage({ params }: Props) {
               >
                 Check local rent trend
               </Link>
+              <ShareButton
+                title={listing.title}
+                text={`${listing.bhk_type} in ${listing.area_name ?? 'Mumbai'} · ${formatINR(listing.rent)}/mo`}
+                url={`${SITE_URL}/listings/${listing.id}`}
+              />
             </div>
           </div>
         </aside>
